@@ -55,7 +55,9 @@ public class TicketServiceImpl implements TicketService {
     private int totalReserved;
 
     /**
-     * Initialize the event space.
+     * @param totalRows            - total the event space has.
+     * @param maxSeatsPerRow       - maxseats under each row.
+     * @param maxHoldTimeInSeconds - max time in seconds to hold the reservation.
      */
     public TicketServiceImpl(int totalRows, int maxSeatsPerRow, int maxHoldTimeInSeconds) {
         eventSpace = new EventSpace(totalRows, maxSeatsPerRow);
@@ -74,7 +76,7 @@ public class TicketServiceImpl implements TicketService {
     /**
      * @return - returns the total seats on hold after cleaning up the expired holds.
      */
-    private int cleanUpExpiredHolds() {
+    private synchronized int cleanUpExpiredHolds() {
 
         LOGGER.info("cleaning up expired seats if any.");
 
@@ -98,7 +100,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public SeatHold findAndHoldSeats(int numSeats, String customerEmail) {
+    public synchronized SeatHold findAndHoldSeats(int numSeats, String customerEmail) {
 
         LOGGER.debug("Customer {} requested {} to hold.", customerEmail, numSeats);
         if (numSeats <= 0 || Objects.isNull(customerEmail) || customerEmail.isEmpty()) {
@@ -106,7 +108,7 @@ public class TicketServiceImpl implements TicketService {
             throw new TicketServiceException(INVALID_HOLD_REQUEST.getErrorCode(), INVALID_HOLD_REQUEST.getErrorMessage());
         }
 
-        if(numSeats > numSeatsAvailable()){
+        if (numSeats > numSeatsAvailable()) {
             LOGGER.info("Customer {} requested more seats to hold than available {}.", customerEmail, numSeats);
             throw new TicketServiceException(NOT_ENOUGH_SEATS_TO_HOLD.getErrorCode(), NOT_ENOUGH_SEATS_TO_HOLD.getErrorMessage());
         }
@@ -134,7 +136,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public String reserveSeats(int seatHoldId, String customerEmail) {
+    public synchronized String reserveSeats(int seatHoldId, String customerEmail) {
         //clean the expired holds. already taken care of the case if user trying to reserve an expired hold.
         cleanUpExpiredHolds();
 

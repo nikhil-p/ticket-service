@@ -1,11 +1,15 @@
 
 package com.walmart.ticketservice;
 
+import com.walmart.ticketservice.dto.Seat;
 import com.walmart.ticketservice.dto.SeatHold;
+import com.walmart.ticketservice.enums.SeatState;
 import com.walmart.ticketservice.exceptions.TicketServiceException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.fail;
 
@@ -73,6 +77,19 @@ public class TicketServiceImplTest {
         String reservationID = ticketService.reserveSeats(seatHold.getHoldID(), seatHold.getCustomerEmail());
         String reservationID2 = ticketService.reserveSeats(seatHold.getHoldID(), seatHold.getCustomerEmail());
         Assert.assertEquals(reservationID, reservationID2);
+    }
+
+    @Test
+    public void testHoldBestAvailableSeats() throws InterruptedException {
+
+        Seat seat1 = new Seat(0, 0, SeatState.ON_HOLD);
+        Seat seat2 = new Seat(0, 1, SeatState.ON_HOLD);
+        SeatHold seatHold = ticketService.findAndHoldSeats(5, "nikhil.kp11@gmail.com");
+        Thread.sleep(1000 * 65);
+        SeatHold seatHold1 = ticketService.findAndHoldSeats(2, "nikhil.kp11@gmail.com");
+        Assert.assertEquals(ticketService.numSeatsAvailable(), 98);
+        List<Seat> onHolds = seatHold1.getOnHoldSeats();
+        Assert.assertEquals(onHolds.get(0), seat1);
     }
 
 }
