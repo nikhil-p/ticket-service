@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="false" debug="false" >
+
+    <property name="LOG_FOLDER_PATH" value="./logs"/>
+    <property name="LOG_LEVEL" value="INFO"/>
+
+    <property name="FILE_LOG_PATTERN"
+              value="[%d{yyyy-MM-dd HH:mm:ss,SSS}] [${LOG_LEVEL_PATTERN:-%5p}] [%10.10t] [%-40.40logger{39}][%-25M:%4L] - %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%ex}"/>
+    <property name="CONSOLE_LOG_PATTERN"
+              value="[%d{yyyy-MM-dd HH:mm:ss,SSS}{faint}] [${LOG_LEVEL_PATTERN:-%5p}] [%10.10t{faint}] [%-40.40logger{39}][%-25M:%4L] - %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%ex}"/>
+
+    <appender name="ticket-service"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${LOG_FOLDER_PATH}/ticket-service.log</File>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Daily rollover -->
+            <fileNamePattern>${LOG_FOLDER_PATH}/ticket-service.log.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>1</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <logger name="com.walmart.ticketservice" level="DEBUG" additivity="false">
+        <appender-ref ref="ticket-service"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <root level="ERROR">
+        <appender-ref ref="ticket-service"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>
